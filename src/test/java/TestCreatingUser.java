@@ -1,16 +1,16 @@
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.response.ValidatableResponse;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Test;
 import test.api.settings.client.UserClient;
+import test.data.GeneratorTestData;
 
 import java.util.concurrent.TimeUnit;
 
 public class TestCreatingUser {
     ValidatableResponse response;
-    String userMail = RandomStringUtils.randomAlphabetic(10) + "@mail.ru";
-    String userPassword = RandomStringUtils.randomAlphabetic(10);
-    String userName = RandomStringUtils.randomAlphabetic(10);
+    String userMail = GeneratorTestData.getRandomMail();
+    String userPassword = GeneratorTestData.getRandomString();
+    String userName = GeneratorTestData.getRandomString();
 
     @Test
     @DisplayName("Создать пользователя и не заполнить email - неуспешно")

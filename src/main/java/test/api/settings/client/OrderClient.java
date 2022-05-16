@@ -6,7 +6,9 @@ import io.restassured.response.ValidatableResponse;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.notNullValue;
 
-public class OrderClient extends ApiClient {
+public class OrderClient extends ApiSpecifications {
+
+    public static final String BASE_REQUEST = "/api/orders";
 
     @Step("Отправка запроса на создание заказа")
     public static ValidatableResponse createOrder(String token, String ingredient) {
@@ -14,7 +16,7 @@ public class OrderClient extends ApiClient {
                 .spec(getAuthSpec(token))
                 .body("{\"ingredients\": [\"" + ingredient + "\"]}")
                 .when()
-                .post("/api/orders")
+                .post(BASE_REQUEST)
                 .then();
     }
 
@@ -24,7 +26,7 @@ public class OrderClient extends ApiClient {
                 .spec(getAuthSpec(token))
                 .body("{\"ingredients\": []}")
                 .when()
-                .post("/api/orders")
+                .post(BASE_REQUEST)
                 .then();
     }
 
@@ -33,7 +35,7 @@ public class OrderClient extends ApiClient {
         return given()
                 .spec(getAuthSpec(token))
                 .when()
-                .get("/api/orders")
+                .get(BASE_REQUEST)
                 .then();
     }
 

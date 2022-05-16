@@ -2,11 +2,18 @@ package test.api.settings.client;
 
 import io.qameta.allure.Step;
 import io.restassured.response.ValidatableResponse;
+import test.data.GeneratorTestData;
+
+import java.util.concurrent.TimeUnit;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 
-public class UserClient extends ApiClient {
+public class UserClient extends ApiSpecifications {
+
+    public static final String BASE_REGISTER_REQUEST = "/api/auth/register";
+    public static final String BASE_USER_REQUEST = "/api/auth/user";
+    public static final String BASE_LOGIN_REQUEST = "/api/auth/login";
 
     @Step("Отправка запроса на создание пользователя")
     public static ValidatableResponse create(String email, String password, String name) {
@@ -16,7 +23,7 @@ public class UserClient extends ApiClient {
                         + "\"password\": \"" + password + "\","
                         + "\"name\": \"" + name + "\"}")
                 .when()
-                .post("/api/auth/register")
+                .post(BASE_REGISTER_REQUEST)
                 .then();
     }
 
@@ -25,7 +32,7 @@ public class UserClient extends ApiClient {
         return given()
                 .spec(getAuthSpec(auth))
                 .when()
-                .delete("/api/auth/user")
+                .delete(BASE_USER_REQUEST)
                 .then();
     }
 
@@ -35,7 +42,7 @@ public class UserClient extends ApiClient {
                 .spec(getBaseSpec())
                 .body("{\"email\":\"" + email + "\"," + "\"password\":\"" + password + "\"}")
                 .when()
-                .post("/api/auth/login")
+                .post(BASE_LOGIN_REQUEST)
                 .then();
     }
 
@@ -47,7 +54,7 @@ public class UserClient extends ApiClient {
                         + "\"password\": \"" + password + "\","
                         + "\"name\": \"" + name + "\"}")
                 .when()
-                .patch("/api/auth/user")
+                .patch(BASE_USER_REQUEST)
                 .then();
     }
 
@@ -57,7 +64,7 @@ public class UserClient extends ApiClient {
                 .spec(getAuthSpec(token))
                 .body("{\"email\": \"" + email + "\"}")
                 .when()
-                .patch("/api/auth/user")
+                .patch(BASE_USER_REQUEST)
                 .then();
     }
 
@@ -67,7 +74,7 @@ public class UserClient extends ApiClient {
                 .spec(getAuthSpec(token))
                 .body("{\"password\": \"" + password + "\"}")
                 .when()
-                .patch("/api/auth/user")
+                .patch(BASE_USER_REQUEST)
                 .then();
     }
 
@@ -77,7 +84,7 @@ public class UserClient extends ApiClient {
                 .spec(getAuthSpec(token))
                 .body("{\"name\": \"" + name + "\"}")
                 .when()
-                .patch("/api/auth/user")
+                .patch(BASE_USER_REQUEST)
                 .then();
     }
 
@@ -94,5 +101,14 @@ public class UserClient extends ApiClient {
     @Step("Проверка обновления данных пользователя в теле ответа")
     public static void assertNewData(ValidatableResponse response, String key, String value) {
         response.assertThat().body("user." + key, equalTo(value));
+    }
+
+    @Step("Проверка на ошибку 429, повторна отправка запроса в случае true")
+    public static ValidatableResponse assert429Error(ValidatableResponse response) throws InterruptedException {
+        if (429 == response.extract().statusCode()) {
+            TimeUnit.MILLISECONDS.sleep(1000);
+            return create(GeneratorTestData.getRandomMail(), GeneratorTestData.getRandomString(), GeneratorTestData.getRandomString()).statusCode(200);
+        }
+        return response;
     }
 }

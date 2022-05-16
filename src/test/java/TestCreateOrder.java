@@ -1,28 +1,25 @@
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.response.ValidatableResponse;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import test.api.settings.client.OrderClient;
 import test.api.settings.client.UserClient;
-
-import java.util.concurrent.TimeUnit;
+import test.data.GeneratorTestData;
 
 public class TestCreateOrder {
     String token;
     ValidatableResponse response;
-    String userMail = RandomStringUtils.randomAlphabetic(10) + "@mail.ru";
-    String userPassword = RandomStringUtils.randomAlphabetic(10);
-    String userName = RandomStringUtils.randomAlphabetic(10);
-    String ingredient = "61c0c5a71d1f82001bdaaa6d";
+    String userMail = GeneratorTestData.getRandomMail();
+    String userPassword = GeneratorTestData.getRandomString();
+    String userName = GeneratorTestData.getRandomString();
+    String ingredient = GeneratorTestData.getIngredient();
 
     @Before
     @DisplayName("Создаём пользователя")
     public void createUser() throws InterruptedException {
-        TimeUnit.MILLISECONDS.sleep(1000);
         response = UserClient.create(userMail, userPassword, userName);
-        UserClient.assertStatusAndBodyTrue(response, 200);
+        response = UserClient.assert429Error(response);
         token = new StringBuilder(response.extract().path("accessToken")).delete(0, 6).toString();
     }
 
@@ -58,7 +55,7 @@ public class TestCreateOrder {
 
     @Test
     @DisplayName("Создание заказа без ингредиента - неуспешно")
-    public void createOrderWithoutIngredientFailed(){
+    public void createOrderWithoutIngredientFailed() {
         ValidatableResponse orderResponse = OrderClient.createOrderWithoutIngredient(token);
         UserClient.assertStatusAndBodyFalse(orderResponse, 400);
     }

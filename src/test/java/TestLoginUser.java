@@ -1,26 +1,23 @@
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.response.ValidatableResponse;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import test.api.settings.client.UserClient;
-
-import java.util.concurrent.TimeUnit;
+import test.data.GeneratorTestData;
 
 public class TestLoginUser {
     ValidatableResponse response;
     String token;
-    String userMail = RandomStringUtils.randomAlphabetic(10) + "@mail.ru";
-    String userPassword = RandomStringUtils.randomAlphabetic(10);
-    String userName = RandomStringUtils.randomAlphabetic(10);
+    String userMail = GeneratorTestData.getRandomMail();
+    String userPassword = GeneratorTestData.getRandomString();
+    String userName = GeneratorTestData.getRandomString();
 
     @Before
     @DisplayName("Создаём пользователя")
     public void createUser() throws InterruptedException {
-        TimeUnit.MILLISECONDS.sleep(1000);
         response = UserClient.create(userMail, userPassword, userName);
-        UserClient.assertStatusAndBodyTrue(response, 200);
+        response = UserClient.assert429Error(response);
     }
 
     @After
